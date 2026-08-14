@@ -40,6 +40,7 @@
     "build": "npm run clean && npm run docgen && tsc && rollup -c rollup.config.mjs",
     "clean": "rimraf ./dist",
     "watch": "tsc --watch",
+    "test": "vitest run",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
@@ -54,7 +55,8 @@
     "rimraf": "^6.1.0",
     "rollup": "^4.53.2",
     "swiftlint": "^2.0.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
   },
   "peerDependencies": {
     "@capacitor/core": ">=7.0.0"
