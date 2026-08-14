@@ -1,15 +1,14 @@
 import XCTest
+
 @testable import PushApplePayPlugin
 
 class PushApplePayTests: XCTestCase {
-    func testEcho() {
-        // This is an example of a functional test case for a plugin.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    func testPluginExposesTheCoreSurface() {
+        let plugin = PushApplePayPlugin()
 
-        let implementation = PushApplePay()
-        let value = "Hello, World!"
-        let result = implementation.echo(value)
-
-        XCTAssertEqual(value, result)
+        XCTAssertEqual(plugin.jsName, "PushApplePay")
+        XCTAssertEqual(
+            plugin.pluginMethods.map(\.name),
+            ["canMakePayments", "presentSheet", "completeSheet"])
     }
 }
