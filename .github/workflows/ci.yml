@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  web:
+    name: TypeScript build + lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run eslint
+      - run: npm run prettier -- --check
+
+  ios:
+    name: Swift build + test
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: xcodebuild build-for-testing -scheme PushcashcoCapacitor-Package -destination 'platform=iOS Simulator,name=iPhone 16' -quiet
+      - name: Test
+        run: xcodebuild test-without-building -scheme PushcashcoCapacitor-Package -destination 'platform=iOS Simulator,name=iPhone 16' -quiet
