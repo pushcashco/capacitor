@@ -4,26 +4,21 @@ import { PushApplePay } from '../src';
 import type { PresentSheetOptions, PushApplePayPlugin, SerializedPayment, SheetStatus } from '../src';
 
 /**
- * End-to-end test against a real local backend (pushcashco/root dev server on
- * localhost:8080), faking only the two pieces that need Apple hardware: the
- * PassKit sheet (FakePlugin) and Basis Theory's decryption (fetch intercept).
- *
- * Backend setup (in the root repo):
- *   make run-postgres run-redis && make migrate-up
- *   make setup-client-fixtures && make setup-bin-fixtures
- *   psql: INSERT INTO applepay_payment_processing_certs
- *     (client_id, token_vault, merchant_identifier, merchant_registration_id, expires_at)
- *     VALUES (118891223, 'basistheory', 'merchant.com.pushcash.example', 'mr_local', now() + interval '25 months');
- *   go run ./cmd
+ * End-to-end test against a real local Push API, faking only the two pieces
+ * that need Apple hardware: the PassKit sheet (FakePlugin) and Basis Theory's
+ * decryption (fetch intercept). Requires a local Push API on localhost:8080
+ * with an operator API key, a payment-processing certificate registered for
+ * the merchant identifier below, and a BIN table covering the fixture BIN —
+ * see the internal "Apple Pay mobile SDK: local testing" runbook.
  *
  * Run:
- *   PUSH_LOCAL_E2E=1 PUSH_API_KEY=<DEV_DEMO_API_KEY from root/.env.local> npx vitest run test/local-e2e.spec.ts
+ *   PUSH_LOCAL_E2E=1 PUSH_API_KEY=<operator API key> npx vitest run test/local-e2e.spec.ts
  */
 
 const API_BASE = 'http://localhost:8080';
 const API_KEY = process.env.PUSH_API_KEY ?? '';
 const MERCHANT_ID = 'merchant.com.pushcash.example';
-// The mxbank BIN fixture range from root's `make setup-bin-fixtures`.
+// A BIN the local backend's BIN table resolves.
 const FIXTURE_BIN = '55555555';
 // The sandbox decision declines Apple Pay deposits of exactly $22.00.
 const DECLINE_AMOUNT = 2200;

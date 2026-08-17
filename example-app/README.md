@@ -6,12 +6,12 @@ authorize calls with a dev API key) and the app UI that drives `display()`.
 
 ## Setup
 
-1. Backend (in the `root` repo): `make run-postgres run-redis`, `make
-   migrate-up`, `make setup-client-fixtures`, `make setup-bin-fixtures`, insert
-   an `applepay_payment_processing_certs` row for your merchant identifier, and
-   `go run ./cmd`.
+1. Run a local Push API on `localhost:8080` with an operator API key and a
+   payment-processing certificate registered for your merchant identifier
+   (Push developers: see the internal "Apple Pay mobile SDK: local testing"
+   runbook).
 2. `cp src/js/dev-config.example.js src/js/dev-config.js` and fill in the
-   API key (`DEV_DEMO_API_KEY` from the backend's `.env.local`).
+   operator API key.
 3. `npm install && npm run build && npx cap sync ios`
 4. After every `cap sync`: the CLI regenerates `ios/App/CapApp-SPM/Package.swift`
    pinned to iOS 14, but the SDK requires 15 — re-apply:

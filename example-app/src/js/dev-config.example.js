@@ -4,7 +4,7 @@ export default {
   // Operator API host the in-app operator stub talks to. The SDK routes itself
   // from the widget URL's nonce, independent of this value.
   apiBase: 'http://localhost:8080',
-  // Operator API key (DEV_DEMO_API_KEY from the backend's .env.local).
+  // Operator API key for the backend above.
   apiKey: '',
   // Must be registered in applepay_payment_processing_certs AND present in the
   // app's Apple Pay entitlement.
