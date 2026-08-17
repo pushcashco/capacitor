@@ -85,7 +85,11 @@ if (config.interceptBasisTheory) {
       log('BT intercept: returning fixture vault references');
       return new Response(
         JSON.stringify({
-          apple_pay: { id: `bt-sim-${Date.now().toString(36)}`, fingerprint: 'fp-simulator', card: { bin: '55555555' } },
+          apple_pay: {
+            id: `bt-sim-${Date.now().toString(36)}`,
+            fingerprint: 'fp-simulator',
+            card: { bin: config.fixtureBin },
+          },
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } },
       );
