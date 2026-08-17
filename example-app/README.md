@@ -25,19 +25,6 @@ servers — an API key never belongs in an app.
 
 Sandbox deposits of exactly $22.00 decline; other amounts approve.
 
-## Simulator
-
-Simulator payments are placeholders end to end (empty `paymentData`,
-"Simulated Instrument" display name, `unknown` card type, constant transaction
-identifier), so on a simulator set `interceptBasisTheory: true` in the dev
-config: it swaps in a realistic payment after the real sheet authorizes and
-stubs the Basis Theory call with fixture vault references. The sheet, the
-bridge, the mint, the authorize round trip, and the completion animations are
-all real. On a physical device leave the flag off — real payments vault for
-real.
-
-## Push developers
-
-The app runs against a local backend by setting `apiBase` to
-`http://localhost:8080` in the dev config — see the internal "Apple Pay
-mobile SDK: local testing" runbook.
+Simulator payments carry placeholder data that cannot be vaulted for real —
+run on a physical device, or see the `interceptBasisTheory` option in
+`dev-config.example.js`.
