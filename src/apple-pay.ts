@@ -169,6 +169,16 @@ export class PushApplePay {
   }
 
   private async tokenize(payment: SerializedPayment, config: ApplePayConfig): Promise<BTApplePayToken> {
+    let paymentData: unknown;
+    try {
+      paymentData = decodeBase64Json(payment.paymentData);
+    } catch (error) {
+      throw new PushApplePayError(
+        'TOKENIZATION_FAILED',
+        'The payment carries no decodable paymentData. Simulator payments have none; use a physical device.',
+        { cause: error },
+      );
+    }
     const response = await fetch(BT_APPLE_PAY_URL, {
       method: 'POST',
       headers: {
@@ -178,7 +188,7 @@ export class PushApplePay {
       body: JSON.stringify({
         merchant_registration_id: config.bt_merchant_registration_id,
         apple_payment_data: {
-          paymentData: decodeBase64Json(payment.paymentData),
+          paymentData,
           transactionIdentifier: payment.transactionIdentifier,
         },
       }),

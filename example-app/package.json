@@ -1,27 +1,20 @@
 {
-  "name": "capacitor-app",
-  "version": "1.0.0",
-  "description": "An Amazing Capacitor App",
+  "name": "push-apple-pay-example",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Example app for the Push Cash Apple Pay Capacitor SDK",
   "type": "module",
-  "keywords": [
-    "capacitor",
-    "mobile"
-  ],
   "scripts": {
-    "start": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "sync": "npm run build && cap sync ios"
   },
   "dependencies": {
-    "@capacitor/core": "latest",
-    "@pushcashco/capacitor": "file:..",
-    "@capacitor/ios": "^8.0.0",
-    "@capacitor/android": "^8.0.0"
+    "@capacitor/core": "^7.0.0",
+    "@pushcashco/capacitor": "file:.."
   },
   "devDependencies": {
-    "@capacitor/cli": "latest",
-    "vite": "^7.3.1"
-  },
-  "author": "",
-  "license": "ISC"
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "vite": "^5.4.0"
+  }
 }

@@ -1,10 +1,10 @@
 {
-  "appId": "com.example.plugin",
-  "appName": "example-app",
+  "appId": "com.pushcash.applepay.example",
+  "appName": "Push Apple Pay",
   "webDir": "dist",
   "plugins": {
-    "SplashScreen": {
-      "launchAutoHide": false
+    "CapacitorHttp": {
+      "enabled": true
     }
   }
 }

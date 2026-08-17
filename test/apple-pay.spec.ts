@@ -197,6 +197,18 @@ describe('PushApplePay', () => {
     expect(plugin.completedWith).toBe('declined');
   });
 
+  it('declines the sheet when the payment carries no decodable paymentData', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(CONFIG));
+    plugin.presentResult = Promise.resolve({ ...PAYMENT, paymentData: '' });
+
+    await expect(
+      sdk().display({ amount: 1000, currency: 'USD', onAuthorize: async () => 'approved' }),
+    ).rejects.toMatchObject({ code: 'TOKENIZATION_FAILED' });
+    expect(plugin.completedWith).toBe('declined');
+    // Basis Theory is never called with an undecodable payment.
+    expect(fetchMock.mock.calls.filter(([url]) => String(url).includes('basistheory'))).toHaveLength(0);
+  });
+
   it('declines the sheet when the Basis Theory response is missing the vault references', async () => {
     fetchMock.mockImplementation(async (input: RequestInfo | URL) => {
       const url = String(input);

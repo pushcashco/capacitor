@@ -1,26 +1,71 @@
 <!doctype html>
-<html lang="en" dir="ltr" class="hydrated">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <title>Example Capacitor App</title>
+    <title>Push Apple Pay</title>
     <meta
       name="viewport"
       content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
     <meta name="format-detection" content="telephone=no" />
+    <style>
+      body {
+        font-family: -apple-system, sans-serif;
+        margin: 0;
+        padding: max(env(safe-area-inset-top), 24px) 20px 20px;
+        background: #f5f5f7;
+      }
+      h1 {
+        font-size: 22px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        margin: 12px 0;
+      }
+      input {
+        flex: 1;
+        font-size: 18px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+      button {
+        font-size: 17px;
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        background: #000;
+        color: #fff;
+      }
+      button.secondary {
+        background: #8e8e93;
+      }
+      #log {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        background: #fff;
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 16px;
+        min-height: 200px;
+      }
+    </style>
   </head>
   <body>
     <main>
-      <h1>Capacitor Test Plugin Project</h1>
-      <p>
-        This project can be used to test out the functionality of your plugin. Nothing in the
-        <em>example-app/</em> folder will be published to npm when using this template, so you can create away!
-      </p>
-      <label for="echoInput">Echo Text:</label>
-      <input type="text" id="echoInput" name="echoInput" value="Hello World!" />
-      <button onclick="testEcho()">Click Me!</button>
+      <h1>Push Apple Pay example</h1>
+      <div class="row">
+        <input type="number" id="amount" value="1500" inputmode="numeric" /> <span style="align-self: center">¢</span>
+      </div>
+      <div class="row">
+        <button id="pay">Pay</button>
+        <button id="payDecline" class="secondary">Pay $22.00 (declines)</button>
+      </div>
+      <div id="log">booting…</div>
     </main>
 
-    <script src="./js/example.js" type="module"></script>
+    <script src="./js/app.js" type="module"></script>
   </body>
 </html>
