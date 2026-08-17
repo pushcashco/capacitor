@@ -220,7 +220,6 @@ export class PushApplePay {
         bin: applePay.card?.bin,
         bt_token_id: applePay.id,
         bt_fingerprint: applePay.fingerprint,
-        transaction_identifier: payment.transactionIdentifier,
         display_name: payment.displayName,
         network: payment.network,
         type: payment.type,

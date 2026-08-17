@@ -122,16 +122,14 @@ describe.runIf(process.env.PUSH_LOCAL_E2E === '1')('local end-to-end', () => {
   const runId = Date.now().toString(36);
   let plugin: FakePlugin;
   let fingerprint: string;
-  let mintBodies: string[];
   let transactionCounter = 0;
 
   beforeEach(() => {
     plugin = new FakePlugin();
     plugin.nextTransactionIdentifier = `txn-${runId}-${++transactionCounter}`;
     fingerprint = `fp-${runId}`;
-    mintBodies = [];
 
-    // Everything real except Basis Theory, plus a wiretap on the mint call.
+    // Everything real except Basis Theory.
     globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (url.includes('basistheory.com/apple-pay')) {
@@ -145,9 +143,6 @@ describe.runIf(process.env.PUSH_LOCAL_E2E === '1')('local end-to-end', () => {
           }),
           { status: 200, headers: { 'Content-Type': 'application/json' } },
         );
-      }
-      if (url.endsWith('/applepay/token')) {
-        mintBodies.push(String(init?.body));
       }
       return realFetch(input, init);
     }) as typeof fetch;
@@ -172,17 +167,6 @@ describe.runIf(process.env.PUSH_LOCAL_E2E === '1')('local end-to-end', () => {
       merchantCapabilities: ['supports3DS'],
       countryCode: 'US',
     });
-
-    // Replaying the exact mint request returns the same token (idempotency on
-    // transaction_identifier).
-    expect(mintBodies).toHaveLength(1);
-    const replay = await realFetch(`${API_BASE}/applepay/token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: mintBodies[0],
-    });
-    expect(replay.status).toBe(200);
-    expect(((await replay.json()) as { token_id: string }).token_id).toBe(result.token);
 
     // The approved deposit created a credential from the vault references.
     expect(firstAuth.credentialId).toMatch(/^cred_/);

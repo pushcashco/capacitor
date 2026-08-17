@@ -8,7 +8,7 @@ Source-of-truth design: the "Tech spec: Apple Pay Mobile SDK" Google Doc (mirror
 
 - An in-app Apple Pay sheet requires native PassKit code (Apple Pay JS is dead inside WKWebView), presented under the **operator's own merchant identifier**, which must be in the operator's app entitlement (Apple scopes merchant IDs to the developer account — no sharing).
 - The unit of reuse is a framework-free Swift core with a thin per-framework adapter (Stripe precedent: `stripe-ios` under `@stripe/stripe-react-native` and community Capacitor plugins). This repo ships the Capacitor adapter; React Native later would add an adapter, not a rewrite.
-- Push never sees decrypted card data: the SDK sends the encrypted PKPaymentToken straight to Basis Theory (Push's vault), and only vault *references* to Push. This keeps operators and Push out of SAD-handling PCI scope.
+- Push never sees decrypted card data: the SDK sends the encrypted PKPaymentToken straight to Basis Theory (Push's vault), and only vault _references_ to Push. This keeps operators and Push out of SAD-handling PCI scope.
 
 ## Repo layout
 
@@ -62,6 +62,7 @@ public func completeSheet(status: SheetStatus)    // .approved | .declined — r
 ```
 
 Key behaviors:
+
 - `presentSheet` holds the PassKit authorization completion open until `completeSheet` is called, so the sheet's success/failure animation reflects the real authorization outcome.
 - The #1 operator setup failure is a merchant identifier missing from the app entitlement — iOS rejects at presentation. Surface this as a distinct, legible error, not a generic failure.
 - Dismissal by the user is a distinct error from presentation failure.
@@ -91,6 +92,7 @@ await applePay.display({
 ```
 
 `display()` algorithm:
+
 1. Parse the session nonce from `url`.
 2. `GET {api}/applepay/config?nonce=...&merchant_identifier=...` → sheet config + BT routing. 403 → `NOT_ENABLED`.
 3. `presentSheet` with operator-passed + config-served fields merged.
@@ -115,10 +117,15 @@ These are shipped backend code in `pushcashco/root` (PRs #6517, #6518, #6520, #6
   "supported_networks": ["visa", "masterCard"],
   "country_code": "US",
   "total_label": "Operator Name",
-  "given_name": "Jane", "family_name": "Doe",
-  "email_address": "...", "phone_number": "...",
-  "address_lines": ["..."], "locality": "...", "administrative_area": "...",
-  "postal_code": "...", "billing_country_code": "US",
+  "given_name": "Jane",
+  "family_name": "Doe",
+  "email_address": "...",
+  "phone_number": "...",
+  "address_lines": ["..."],
+  "locality": "...",
+  "administrative_area": "...",
+  "postal_code": "...",
+  "billing_country_code": "US",
   "bt_application_key": "key_test_us_pub_...",
   "bt_merchant_registration_id": "<uuid>"
 }
@@ -134,7 +141,6 @@ Unregistered merchant identifier → **403**, plaintext body `Apple Pay mobile i
   "bin": "<apple_pay.card.bin from the BT response>",
   "bt_token_id": "<apple_pay.id>",
   "bt_fingerprint": "<apple_pay.fingerprint>",
-  "transaction_identifier": "<Apple transactionIdentifier>",
   "display_name": "Visa 1234",
   "network": "Visa",
   "type": "debit",
@@ -145,8 +151,9 @@ Unregistered merchant identifier → **403**, plaintext body `Apple Pay mobile i
 ```
 
 → 200 `{"token_id": "token_..."}`. Rules the SDK relies on:
-- `bt_token_id`, `bt_fingerprint`, `transaction_identifier` are required together; `low_value_token` (the web SDK's field) is mutually exclusive with them.
-- Replaying the same `transaction_identifier` returns the **same** token — mint retries after a lost response are safe and expected.
+
+- `bt_token_id` and `bt_fingerprint` are required together; `low_value_token` (the web SDK's field) is mutually exclusive with them.
+- The mint is NOT idempotent: a lost response surfaces as TOKEN_MINT_FAILED and the user taps again (fresh Apple payment). Do not add client-side mint retries without reintroducing server-side idempotency.
 - `display_name` must end with the card's last 4 digits (400/500 otherwise).
 - The BIN must resolve to a known BIN range (500 otherwise) — if sandbox device testing hits "Failed to resolve bin range", the backend's BIN coverage of Apple sandbox DPANs is the suspect, not the SDK.
 - `amount > 0`, `currency == "USD"`, `direction == "cash_in"` are enforced.
@@ -157,7 +164,7 @@ Header `BT-API-KEY: <bt_application_key>`; body carries `apple_payment_data` (th
 
 ## Testing & CI
 
-- **TS unit** (Vitest): full `display()` orchestration against mocked plugin + mocked fetch — happy path, every typed error, mint retry on same `transaction_identifier`.
+- **TS unit** (Vitest): full `display()` orchestration against mocked plugin + mocked fetch — happy path, every typed error.
 - **Swift unit**: SheetRequest mapping, SerializedPayment encoding, completion-holding semantics.
 - **Example app** (`example-app/`): the device-validation vehicle. Push-owned test merchant ID in its entitlement, Push sandbox backend, Apple sandbox tester account, physical device. Sandbox decline trigger: amount **$22.00** (2200 cents). It needs a stub operator backend (small script/server in `example-app/server/`) that calls Push's `POST /user/{id}/url` and `POST /authorize` with a sandbox API key — keys via env, never committed.
 - **CI** (`ci.yml`): tsc + eslint + vitest; `swift build` + `swift test`; `pod lib lint`; example app compile. **Publish** (`publish.yml`): on tag → npm publish with provenance.

@@ -140,7 +140,6 @@ describe('PushApplePay', () => {
       bin: '411111',
       bt_token_id: 'bt-token-1',
       bt_fingerprint: 'fp-A',
-      transaction_identifier: 'txn-1',
       display_name: 'Visa 1234',
       network: 'Visa',
       type: 'debit',

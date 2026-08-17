@@ -90,11 +90,11 @@ should use `PushApplePay` above and never call it directly.
 
 <docgen-index>
 
-- [`canMakePayments()`](#canmakepayments)
-- [`presentSheet(...)`](#presentsheet)
-- [`completeSheet(...)`](#completesheet)
-- [Interfaces](#interfaces)
-- [Type Aliases](#type-aliases)
+* [`canMakePayments()`](#canmakepayments)
+* [`presentSheet(...)`](#presentsheet)
+* [`completeSheet(...)`](#completesheet)
+* [Interfaces](#interfaces)
+* [Type Aliases](#type-aliases)
 
 </docgen-index>
 
@@ -111,7 +111,8 @@ Reports whether the device supports Apple Pay payments.
 
 **Returns:** <code>Promise&lt;{ available: boolean; }&gt;</code>
 
----
+--------------------
+
 
 ### presentSheet(...)
 
@@ -133,7 +134,8 @@ merchant identifier missing from the app's Apple Pay entitlement.
 
 **Returns:** <code>Promise&lt;<a href="#serializedpayment">SerializedPayment</a>&gt;</code>
 
----
+--------------------
+
 
 ### completeSheet(...)
 
@@ -148,9 +150,11 @@ it animate out truthfully.
 | ------------- | ---------------------------------------------------------------- |
 | **`options`** | <code>{ status: <a href="#sheetstatus">SheetStatus</a>; }</code> |
 
----
+--------------------
+
 
 ### Interfaces
+
 
 #### SerializedPayment
 
@@ -165,6 +169,7 @@ encrypted to the merchant's payment-processing certificate.
 | **`type`**                  | <code>string</code> | debit \| credit \| prepaid \| store \| unknown                   |
 | **`transactionIdentifier`** | <code>string</code> | Apple's transaction identifier — the token-mint idempotency key. |
 
+
 #### PresentSheetOptions
 
 | Prop                       | Type                  | Description                                                                                   |
@@ -177,7 +182,9 @@ encrypted to the merchant's payment-processing certificate.
 | **`supportedNetworks`**    | <code>string[]</code> | Card networks the sheet accepts. Served by the Push config endpoint.                          |
 | **`merchantCapabilities`** | <code>string[]</code> | Merchant capabilities, e.g. "supports3DS". Served by the Push config endpoint.                |
 
+
 ### Type Aliases
+
 
 #### SheetStatus
 
