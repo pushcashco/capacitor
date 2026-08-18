@@ -50,8 +50,6 @@ interface BTApplePayToken {
   card?: { bin?: string };
 }
 
-const BT_APPLE_PAY_URL = 'https://api.basistheory.com/apple-pay';
-
 /**
  * The Push Cash Apple Pay flow: fetches the sheet configuration, presents the
  * sheet, vaults the payment with Basis Theory, mints the Push token, and
@@ -60,6 +58,7 @@ const BT_APPLE_PAY_URL = 'https://api.basistheory.com/apple-pay';
 export class PushApplePay {
   private readonly nonce: string;
   private readonly apiBaseUrl: string;
+  private readonly btApplePayUrl: string;
   private readonly merchantIdentifier: string;
   private readonly plugin: PushApplePayPlugin;
 
@@ -75,6 +74,7 @@ export class PushApplePay {
     }
     this.nonce = nonce;
     this.apiBaseUrl = PushApplePay.baseUrlForNonce(nonce);
+    this.btApplePayUrl = PushApplePay.btApplePayUrlForNonce(nonce);
     this.merchantIdentifier = options.merchantIdentifier;
     this.plugin = plugin;
   }
@@ -88,6 +88,17 @@ export class PushApplePay {
       return 'https://sandbox.pushcash.com';
     }
     return 'http://localhost:8080';
+  }
+
+  /**
+   * The nonce's environment suffix also picks the Basis Theory host: test
+   * application keys only work against Basis Theory's test API.
+   */
+  private static btApplePayUrlForNonce(nonce: string): string {
+    if (nonce.endsWith('_production')) {
+      return 'https://api.basistheory.com/apple-pay';
+    }
+    return 'https://api.test.basistheory.com/apple-pay';
   }
 
   async canMakePayments(): Promise<boolean> {
@@ -179,7 +190,7 @@ export class PushApplePay {
         { cause: error },
       );
     }
-    const response = await fetch(BT_APPLE_PAY_URL, {
+    const response = await fetch(this.btApplePayUrl, {
       method: 'POST',
       headers: {
         'BT-API-KEY': config.bt_application_key,

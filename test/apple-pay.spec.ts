@@ -122,7 +122,8 @@ describe('PushApplePay', () => {
     // Basis Theory gets the application key, the registration id, and the
     // decoded payment data.
     const [btUrl, btInit] = fetchMock.mock.calls[1] as [string, RequestInit];
-    expect(btUrl).toBe('https://api.basistheory.com/apple-pay');
+    // The sandbox nonce routes tokenization to Basis Theory's test API.
+    expect(btUrl).toBe('https://api.test.basistheory.com/apple-pay');
     expect((btInit.headers as Record<string, string>)['BT-API-KEY']).toBe('key_test_us_pub_abc');
     expect(JSON.parse(String(btInit.body))).toEqual({
       merchant_registration_id: 'mr-123',

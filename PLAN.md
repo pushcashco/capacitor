@@ -96,7 +96,7 @@ await applePay.display({
 1. Parse the session nonce from `url`.
 2. `GET {api}/applepay/config?nonce=...&merchant_identifier=...` → sheet config + BT routing. 403 → `NOT_ENABLED`.
 3. `presentSheet` with operator-passed + config-served fields merged.
-4. `POST https://api.basistheory.com/apple-pay` with the encrypted payment data, authenticated with `bt_application_key`, targeting `bt_merchant_registration_id` → BT vaults DPAN/cryptogram/ECI, returns the `apple_pay` resource (id, fingerprint, card enrichment).
+4. `POST {bt-api}/apple-pay` with the encrypted payment data, authenticated with `bt_application_key`, targeting `bt_merchant_registration_id` → BT vaults DPAN/cryptogram/ECI, returns the `apple_pay` resource (id, fingerprint, card enrichment).
 5. `POST {api}/applepay/token` with the nonce + BT references (contract below) → `token_id`.
 6. `status = await onAuthorize(token_id)` — runs while the sheet is up.
 7. `completeSheet(status)`; call `onComplete`.
@@ -158,7 +158,7 @@ Unregistered merchant identifier → **403**, plaintext body `Apple Pay mobile i
 - The BIN must resolve to a known BIN range (500 otherwise) — if sandbox device testing hits "Failed to resolve bin range", the backend's BIN coverage of Apple sandbox DPANs is the suspect, not the SDK.
 - `amount > 0`, `currency == "USD"`, `direction == "cash_in"` are enforced.
 
-### Basis Theory — `POST https://api.basistheory.com/apple-pay`
+### Basis Theory — `POST {bt-api}/apple-pay` (host by environment: `api.basistheory.com` for production nonces, `api.test.basistheory.com` otherwise — test keys only work against the test API)
 
 Header `BT-API-KEY: <bt_application_key>`; body carries `apple_payment_data` (the PKPaymentToken payment data) and the `merchant_registration_id`. **VERIFY at implementation**: (a) the exact body field placement of `merchant_registration_id` per current BT docs (https://developers.basistheory.com/docs/api/apple-pay/api), and (b) that the public-key response includes `fingerprint` and `card` (bin/last4) — the API reference documents them, but the implementation guide's example shows a reduced body. The whole mint contract depends on (b); confirm on the first real device call and escalate to BT support if reduced.
 
