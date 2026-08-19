@@ -1,4 +1,4 @@
-# @pushcashco/capacitor
+# @pushcash/capacitor
 
 Apple Pay deposits for Push Cash operators, as a Capacitor plugin. The SDK
 presents the Apple Pay sheet, exchanges the payment for a Push token, and
@@ -17,7 +17,7 @@ the final animation.
 ## Install
 
 ```bash
-npm install @pushcashco/capacitor
+npm install @pushcash/capacitor
 npx cap sync
 ```
 
@@ -29,7 +29,7 @@ URL to your app. The SDK derives everything else — environment, session, and
 sheet configuration — from that URL.
 
 ```typescript
-import { PushApplePay } from '@pushcashco/capacitor';
+import { PushApplePay } from '@pushcash/capacitor';
 
 const applePay = new PushApplePay({
   url: sessionUrlFromYourBackend,

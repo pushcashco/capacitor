@@ -2,7 +2,7 @@
 
 ## What this repo is
 
-The Push Cash Capacitor SDK for Apple Pay: the npm package `@pushcashco/capacitor`. A Capacitor plugin (TypeScript flow layer + thin `CAPPlugin` bridge) wrapping a framework-free Swift core that presents the Apple Pay sheet via PassKit. Operators embed it in their Capacitor iOS apps to accept Apple Pay deposits through Push Cash.
+The Push Cash Capacitor SDK for Apple Pay: the npm package `@pushcash/capacitor`. A Capacitor plugin (TypeScript flow layer + thin `CAPPlugin` bridge) wrapping a framework-free Swift core that presents the Apple Pay sheet via PassKit. Operators embed it in their Capacitor iOS apps to accept Apple Pay deposits through Push Cash.
 
 ## Hard rules
 

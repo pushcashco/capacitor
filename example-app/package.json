@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@capacitor/core": "^7.0.0",
-    "@pushcashco/capacitor": "file:.."
+    "@pushcash/capacitor": "file:.."
   },
   "devDependencies": {
     "@capacitor/cli": "^7.0.0",

@@ -1,5 +1,5 @@
 {
-  "name": "@pushcashco/capacitor",
+  "name": "@pushcash/capacitor",
   "version": "0.1.0",
   "description": "Push Cash Capacitor SDK for Apple Pay",
   "main": "dist/plugin.cjs.js",

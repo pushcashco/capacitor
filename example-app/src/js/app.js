@@ -1,4 +1,4 @@
-import { PushApplePay, PushApplePayNative } from '@pushcashco/capacitor';
+import { PushApplePay, PushApplePayNative } from '@pushcash/capacitor';
 
 import config from './dev-config.js';
 
