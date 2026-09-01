@@ -53,9 +53,11 @@ if (await applePay.canMakePayments()) {
 ```
 
 `display()` runs the whole flow: fetches the sheet configuration for your
-merchant identifier, presents the sheet, vaults the authorized payment,
-mints the Push token, and completes the sheet with the outcome your
-`onAuthorize` returns. Deposits only — the direction is always `cash_in`.
+merchant identifier, records the presentation as a Push intent (when your
+account is enabled for it — your `POST /authorize` then completes that
+intent), presents the sheet, vaults the authorized payment, mints the Push
+token, and completes the sheet with the outcome your `onAuthorize` returns.
+Deposits only — the direction is always `cash_in`.
 
 ### Errors
 
@@ -64,6 +66,7 @@ Failures reject with a `PushApplePayError` carrying a `code`:
 | Code                                          | Meaning                                                                                                         |
 | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `NOT_ENABLED`                                 | The merchant identifier has no payment-processing certificate registered with Push.                             |
+| `INTENT_CREATE_FAILED`                        | The intent recording the presentation could not be created; the sheet was not shown.                            |
 | `CANNOT_MAKE_PAYMENTS`                        | The device cannot make Apple Pay payments.                                                                      |
 | `PRESENTATION_FAILED`                         | iOS refused to present — most commonly the merchant identifier is missing from the app's Apple Pay entitlement. |
 | `SHEET_DISMISSED`                             | The user closed the sheet without authorizing.                                                                  |

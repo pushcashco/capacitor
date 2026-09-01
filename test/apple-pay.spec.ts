@@ -270,6 +270,82 @@ describe('PushApplePay', () => {
     expect(plugin.completedWith).toBe('declined');
   });
 
+  describe('presentation intents', () => {
+    const ENABLED_CONFIG = { ...CONFIG, presented_intents_enabled: true };
+
+    function stubEnabledBackend(intentResponse: Response = jsonResponse({ intent_id: 'intent_abc' })): void {
+      fetchMock.mockImplementation(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes('/applepay/config')) {
+          return jsonResponse(ENABLED_CONFIG);
+        }
+        if (url.includes('/applepay/intent')) {
+          return intentResponse;
+        }
+        if (url.includes('basistheory.com/apple-pay')) {
+          return jsonResponse(BT_RESPONSE);
+        }
+        if (url.includes('/applepay/token')) {
+          return jsonResponse({ token_id: 'token_1' });
+        }
+        throw new Error(`unexpected fetch: ${url}`);
+      });
+    }
+
+    it('creates the intent before presenting and passes its id to the mint', async () => {
+      stubEnabledBackend();
+
+      const result = await sdk().display({ amount: 1000, currency: 'USD', onAuthorize: async () => 'approved' });
+      expect(result.status).toBe('approved');
+
+      // config → intent → sheet → Basis Theory → mint
+      const urls = fetchMock.mock.calls.map(([url]) => String(url));
+      expect(urls[1]).toBe('https://sandbox.pushcash.com/applepay/intent');
+      const [, intentInit] = fetchMock.mock.calls[1] as [string, RequestInit];
+      expect(JSON.parse(String(intentInit.body))).toEqual({
+        nonce: 'abc123_sandbox',
+        amount: 1000,
+        currency: 'USD',
+        direction: 'cash_in',
+      });
+      expect(plugin.presentedWith).not.toBeNull();
+
+      const [mintUrl, mintInit] = fetchMock.mock.calls[3] as [string, RequestInit];
+      expect(mintUrl).toBe('https://sandbox.pushcash.com/applepay/token');
+      expect(JSON.parse(String(mintInit.body))).toMatchObject({ intent_id: 'intent_abc' });
+    });
+
+    it('rejects with INTENT_CREATE_FAILED and never presents when the intent request fails', async () => {
+      stubEnabledBackend(new Response('boom', { status: 500 }));
+
+      await expect(
+        sdk().display({ amount: 1000, currency: 'USD', onAuthorize: async () => 'approved' }),
+      ).rejects.toMatchObject({ code: 'INTENT_CREATE_FAILED' });
+      expect(plugin.presentedWith).toBeNull();
+      expect(plugin.completedWith).toBeNull();
+    });
+
+    it('rejects with INTENT_CREATE_FAILED when the response carries no intent_id', async () => {
+      stubEnabledBackend(jsonResponse({}));
+
+      await expect(
+        sdk().display({ amount: 1000, currency: 'USD', onAuthorize: async () => 'approved' }),
+      ).rejects.toMatchObject({ code: 'INTENT_CREATE_FAILED' });
+      expect(plugin.presentedWith).toBeNull();
+    });
+
+    it('skips the intent and omits intent_id when the client is not enabled', async () => {
+      stubHappyBackend();
+
+      await sdk().display({ amount: 1000, currency: 'USD', onAuthorize: async () => 'approved' });
+
+      const urls = fetchMock.mock.calls.map(([url]) => String(url));
+      expect(urls.some((url) => url.includes('/applepay/intent'))).toBe(false);
+      const [, mintInit] = fetchMock.mock.calls[2] as [string, RequestInit];
+      expect(JSON.parse(String(mintInit.body))).not.toHaveProperty('intent_id');
+    });
+  });
+
   it('resolves the production API host from the nonce suffix', () => {
     const prod = new PushApplePay(
       { url: 'https://cdn.pushcash.com/widget/?nonce=abc_production', merchantIdentifier: MERCHANT_ID },

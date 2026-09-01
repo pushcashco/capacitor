@@ -3,6 +3,12 @@ export type PushApplePayErrorCode =
   | 'NOT_ENABLED'
   /** The Push config endpoint failed for a reason other than NOT_ENABLED. */
   | 'CONFIG_FAILED'
+  /**
+   * The intent that records the sheet presentation could not be created, so
+   * the sheet was not shown. Only raised for clients enabled for
+   * presentation-time intents.
+   */
+  | 'INTENT_CREATE_FAILED'
   /** The device cannot make Apple Pay payments. */
   | 'CANNOT_MAKE_PAYMENTS'
   /**

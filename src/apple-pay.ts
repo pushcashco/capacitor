@@ -42,6 +42,12 @@ interface ApplePayConfig {
   total_label: string;
   bt_application_key: string;
   bt_merchant_registration_id: string;
+  /**
+   * When true, the SDK records the sheet presentation as an Apple Pay intent
+   * (POST /applepay/intent) before presenting, and the token mint carries its
+   * id so the operator's /authorize completes that intent.
+   */
+  presented_intents_enabled?: boolean;
 }
 
 interface BTApplePayToken {
@@ -51,7 +57,8 @@ interface BTApplePayToken {
 }
 
 /**
- * The Push Cash Apple Pay flow: fetches the sheet configuration, presents the
+ * The Push Cash Apple Pay flow: fetches the sheet configuration, records the
+ * presentation as an intent (when the client is enabled for it), presents the
  * sheet, vaults the payment with Basis Theory, mints the Push token, and
  * completes the sheet with the operator's real authorization outcome.
  */
@@ -112,6 +119,10 @@ export class PushApplePay {
   async display(options: DisplayOptions): Promise<DisplayResult> {
     const config = await this.fetchConfig();
 
+    // The intent exists before the sheet is shown; a failure here rejects
+    // display() with nothing presented.
+    const intentId = config.presented_intents_enabled ? await this.createIntent(options) : undefined;
+
     let payment: SerializedPayment;
     try {
       payment = await this.plugin.presentSheet({
@@ -132,7 +143,7 @@ export class PushApplePay {
     let token: string;
     try {
       const applePay = await this.tokenize(payment, config);
-      token = await this.mintToken(payment, applePay, options);
+      token = await this.mintToken(payment, applePay, options, intentId);
     } catch (error) {
       await this.completeSheetQuietly('declined');
       throw error;
@@ -179,6 +190,31 @@ export class PushApplePay {
     return (await response.json()) as ApplePayConfig;
   }
 
+  /**
+   * Records the sheet presentation as an Apple Pay intent and returns its id.
+   * The operator's /authorize completes this intent rather than creating one.
+   */
+  private async createIntent(options: DisplayOptions): Promise<string> {
+    const response = await fetch(`${this.apiBaseUrl}/applepay/intent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nonce: this.nonce,
+        amount: options.amount,
+        currency: options.currency,
+        direction: 'cash_in',
+      }),
+    });
+    if (!response.ok) {
+      throw new PushApplePayError('INTENT_CREATE_FAILED', `The Apple Pay intent request failed (${response.status}).`);
+    }
+    const body = (await response.json()) as { intent_id?: string };
+    if (!body.intent_id) {
+      throw new PushApplePayError('INTENT_CREATE_FAILED', 'The Apple Pay intent response carries no intent_id.');
+    }
+    return body.intent_id;
+  }
+
   private async tokenize(payment: SerializedPayment, config: ApplePayConfig): Promise<BTApplePayToken> {
     let paymentData: unknown;
     try {
@@ -222,6 +258,7 @@ export class PushApplePay {
     payment: SerializedPayment,
     applePay: BTApplePayToken,
     options: DisplayOptions,
+    intentId?: string,
   ): Promise<string> {
     const response = await fetch(`${this.apiBaseUrl}/applepay/token`, {
       method: 'POST',
@@ -237,6 +274,7 @@ export class PushApplePay {
         amount: options.amount,
         currency: options.currency,
         direction: 'cash_in',
+        intent_id: intentId,
       }),
     });
     if (!response.ok) {
