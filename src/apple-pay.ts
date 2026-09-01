@@ -203,7 +203,6 @@ export class PushApplePay {
         amount: options.amount,
         currency: options.currency,
         direction: 'cash_in',
-        platform: 'mobile',
       }),
     });
     if (!response.ok) {

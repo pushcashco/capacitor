@@ -307,7 +307,6 @@ describe('PushApplePay', () => {
         amount: 1000,
         currency: 'USD',
         direction: 'cash_in',
-        platform: 'mobile',
       });
       expect(plugin.presentedWith).not.toBeNull();
 
