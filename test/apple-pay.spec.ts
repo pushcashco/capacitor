@@ -278,6 +278,16 @@ describe('PushApplePay', () => {
     expect(prod).toBeInstanceOf(PushApplePay);
   });
 
+  it("routes a production nonce's tokenization to Basis Theory's regional US API", async () => {
+    stubHappyBackend();
+    await new PushApplePay(
+      { url: 'https://cdn.pushcash.com/widget/?nonce=abc_production', merchantIdentifier: MERCHANT_ID },
+      plugin,
+    ).display({ amount: 1000, currency: 'USD', onAuthorize: async () => 'approved' });
+
+    expect(String(fetchMock.mock.calls[1][0])).toBe('https://api.us.basistheory.com/apple-pay');
+  });
+
   it('reports device capability from the plugin', async () => {
     plugin.available = false;
     await expect(sdk().canMakePayments()).resolves.toBe(false);
