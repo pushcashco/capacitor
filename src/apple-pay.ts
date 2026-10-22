@@ -96,7 +96,7 @@ export class PushApplePay {
    */
   private static btApplePayUrlForNonce(nonce: string): string {
     if (nonce.endsWith('_production')) {
-      return 'https://api.basistheory.com/apple-pay';
+      return 'https://api.us.basistheory.com/apple-pay';
     }
     return 'https://api.test.basistheory.com/apple-pay';
   }
